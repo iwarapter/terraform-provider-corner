@@ -10,11 +10,12 @@ import (
 // User represents a user in the database.
 type User struct {
 	// Email must be unique, and is treated as the User's UUID.
-	Email      string
-	Name       string
-	Age        int
-	DateJoined string
-	Language   string
+	Email       string
+	Name        string
+	WithDefault string
+	Age         int
+	DateJoined  string
+	Language    string
 }
 
 // Region represents an availability region in the database.

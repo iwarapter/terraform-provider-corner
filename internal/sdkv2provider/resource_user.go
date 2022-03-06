@@ -25,6 +25,11 @@ func resourceUser() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"with_default": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "example",
+			},
 			"age": {
 				Type:     schema.TypeInt,
 				Required: true,
@@ -36,9 +41,10 @@ func resourceUser() *schema.Resource {
 func resourceUserCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*backend.Client)
 	newUser := &backend.User{
-		Email: d.Get("email").(string),
-		Name:  d.Get("name").(string),
-		Age:   d.Get("age").(int),
+		Email:       d.Get("email").(string),
+		Name:        d.Get("name").(string),
+		Age:         d.Get("age").(int),
+		WithDefault: d.Get("with_default").(string),
 	}
 
 	err := client.CreateUser(newUser)
@@ -73,7 +79,10 @@ func resourceUserRead(ctx context.Context, d *schema.ResourceData, meta interfac
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
+	err = d.Set("with_default", p.WithDefault)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	return nil
 }
 
@@ -81,9 +90,10 @@ func resourceUserUpdate(ctx context.Context, d *schema.ResourceData, meta interf
 	client := meta.(*backend.Client)
 
 	user := &backend.User{
-		Email: d.Get("email").(string),
-		Name:  d.Get("name").(string),
-		Age:   d.Get("age").(int),
+		Email:       d.Get("email").(string),
+		Name:        d.Get("name").(string),
+		Age:         d.Get("age").(int),
+		WithDefault: d.Get("with_default").(string),
 	}
 
 	err := client.UpdateUser(user)
@@ -98,9 +108,10 @@ func resourceUserDelete(ctx context.Context, d *schema.ResourceData, meta interf
 	client := meta.(*backend.Client)
 
 	user := &backend.User{
-		Email: d.Get("email").(string),
-		Name:  d.Get("name").(string),
-		Age:   d.Get("age").(int),
+		Email:       d.Get("email").(string),
+		Name:        d.Get("name").(string),
+		Age:         d.Get("age").(int),
+		WithDefault: d.Get("with_default").(string),
 	}
 
 	err := client.DeleteUser(user)

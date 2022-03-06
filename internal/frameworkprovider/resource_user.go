@@ -28,6 +28,11 @@ func (r resourceUserType) GetSchema(_ context.Context) (tfsdk.Schema, diag.Diagn
 				Type:     types.NumberType,
 				Required: true,
 			},
+			"with_default": {
+				Type:          types.StringType,
+				Optional:      true,
+				PlanModifiers: tfsdk.AttributePlanModifiers{stringDefault("example")},
+			},
 			// included only for compatibility with SDKv2 test framework
 			"id": {
 				Type:     types.StringType,
@@ -63,12 +68,13 @@ type resourceUser struct {
 }
 
 type user struct {
-	Email      string       `tfsdk:"email"`
-	Name       string       `tfsdk:"name"`
-	Age        int          `tfsdk:"age"`
-	Id         string       `tfsdk:"id"`
-	DateJoined types.String `tfsdk:"date_joined"`
-	Language   types.String `tfsdk:"language"`
+	Email       string       `tfsdk:"email"`
+	Name        string       `tfsdk:"name"`
+	Age         int          `tfsdk:"age"`
+	Id          string       `tfsdk:"id"`
+	WithDefault string       `tfsdk:"with_default"`
+	DateJoined  types.String `tfsdk:"date_joined"`
+	Language    types.String `tfsdk:"language"`
 }
 
 func (r resourceUser) Create(ctx context.Context, req tfsdk.CreateResourceRequest, resp *tfsdk.CreateResourceResponse) {

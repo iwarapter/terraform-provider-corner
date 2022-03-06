@@ -17,6 +17,8 @@ func testAccResourceUser(t *testing.T) resource.TestCase {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestMatchResourceAttr(
 						"corner_user.foo", "name", regexp.MustCompile("^For")),
+					resource.TestCheckResourceAttr(
+						"corner_user.foo", "with_default", "example"),
 				),
 			},
 		},
