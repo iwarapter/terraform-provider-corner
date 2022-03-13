@@ -28,5 +28,6 @@ resource "corner_user" "foo" {
   email = "ford@prefect.co"
   name = "Ford Prefect"
   age = 200
+  date_joined = "break"
 }
 `

@@ -2,7 +2,6 @@ package sdkv2
 
 import (
 	"context"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-provider-corner/internal/backend"
@@ -28,6 +27,10 @@ func resourceUser() *schema.Resource {
 			"age": {
 				Type:     schema.TypeInt,
 				Required: true,
+			},
+			"date_joined": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}

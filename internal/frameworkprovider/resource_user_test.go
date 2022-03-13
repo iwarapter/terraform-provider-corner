@@ -125,6 +125,7 @@ resource "framework_user" "foo" {
   age = 18
   id = "jdoe"
   language = "es"
+  date_joined = "break"
 }
 `
 
