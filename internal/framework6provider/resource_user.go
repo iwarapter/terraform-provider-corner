@@ -2,7 +2,7 @@ package framework
 
 import (
 	"context"
-
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -62,7 +62,76 @@ func (r *resourceUser) Schema(_ context.Context, _ resource.SchemaRequest, resp 
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
+			"oidc_policy": schema.SingleNestedAttribute{
+				Description: `Open ID Connect Policy settings.  This is included in the message only when OIDC is enabled.`,
+				Optional:    true,
+				Computed:    true,
+				Attributes:  singleClientOIDCPolicy(),
+				PlanModifiers: []planmodifier.Object{
+					DefaultObject(map[string]attr.Type{
+						"grant_access_session_revocation_api":         types.BoolType,
+						"grant_access_session_session_management_api": types.BoolType,
+						"pairwise_identifier_user_type":               types.BoolType,
+						"ping_access_logout_capable":                  types.BoolType,
+						"id_token_content_encryption_algorithm":       types.StringType,
+						"id_token_encryption_algorithm":               types.StringType,
+						"id_token_signing_algorithm":                  types.StringType,
+						"policy_group":                                types.StringType,
+						"sector_identifier_uri":                       types.StringType,
+						"logout_uris":                                 types.ListType{ElemType: types.StringType},
+					}, map[string]attr.Value{
+						"grant_access_session_revocation_api":         types.BoolValue(false),
+						"grant_access_session_session_management_api": types.BoolValue(false),
+						"pairwise_identifier_user_type":               types.BoolValue(false),
+						"ping_access_logout_capable":                  types.BoolValue(false),
+						"id_token_content_encryption_algorithm":       types.StringNull(),
+						"id_token_encryption_algorithm":               types.StringNull(),
+						"id_token_signing_algorithm":                  types.StringNull(),
+						"policy_group":                                types.StringNull(),
+						"sector_identifier_uri":                       types.StringNull(),
+						"logout_uris":                                 types.ListNull(types.StringType),
+					}),
+				},
+			},
 		},
+	}
+}
+
+func singleClientOIDCPolicy() map[string]schema.Attribute {
+	return map[string]schema.Attribute{
+		"grant_access_session_revocation_api": schema.BoolAttribute{
+			Optional: true,
+			PlanModifiers: []planmodifier.Bool{
+				DefaultBool(false),
+			},
+		},
+		"grant_access_session_session_management_api": schema.BoolAttribute{
+			Optional: true,
+			Computed: true,
+			PlanModifiers: []planmodifier.Bool{
+				DefaultBool(false),
+			},
+		},
+		"id_token_content_encryption_algorithm": schema.StringAttribute{Optional: true},
+		"id_token_encryption_algorithm":         schema.StringAttribute{Optional: true},
+		"id_token_signing_algorithm": schema.StringAttribute{
+			Optional: true,
+			Computed: true,
+			PlanModifiers: []planmodifier.String{
+				DefaultString("RS256"),
+			},
+		},
+		"logout_uris": schema.ListAttribute{Optional: true, ElementType: types.StringType},
+		"pairwise_identifier_user_type": schema.BoolAttribute{
+			Optional: true,
+			Computed: true,
+			PlanModifiers: []planmodifier.Bool{
+				DefaultBool(false),
+			},
+		},
+		"ping_access_logout_capable": schema.BoolAttribute{Optional: true},
+		"policy_group":               schema.StringAttribute{Optional: true},
+		"sector_identifier_uri":      schema.StringAttribute{Optional: true},
 	}
 }
 
@@ -75,12 +144,26 @@ func (r *resourceUser) Configure(_ context.Context, req resource.ConfigureReques
 }
 
 type user struct {
-	Email      string       `tfsdk:"email"`
-	Name       string       `tfsdk:"name"`
-	Age        int          `tfsdk:"age"`
-	Id         string       `tfsdk:"id"`
-	DateJoined types.String `tfsdk:"date_joined"`
-	Language   types.String `tfsdk:"language"`
+	Email      string                `tfsdk:"email"`
+	Name       string                `tfsdk:"name"`
+	Age        int                   `tfsdk:"age"`
+	Id         string                `tfsdk:"id"`
+	DateJoined types.String          `tfsdk:"date_joined"`
+	Language   types.String          `tfsdk:"language"`
+	OidcPolicy *ClientOIDCPolicyData `tfsdk:"oidc_policy"`
+}
+
+type ClientOIDCPolicyData struct {
+	GrantAccessSessionRevocationApi        types.Bool     `tfsdk:"grant_access_session_revocation_api"`
+	GrantAccessSessionSessionManagementApi types.Bool     `tfsdk:"grant_access_session_session_management_api"`
+	IdTokenContentEncryptionAlgorithm      types.String   `tfsdk:"id_token_content_encryption_algorithm"`
+	IdTokenEncryptionAlgorithm             types.String   `tfsdk:"id_token_encryption_algorithm"`
+	IdTokenSigningAlgorithm                types.String   `tfsdk:"id_token_signing_algorithm"`
+	LogoutUris                             []types.String `tfsdk:"logout_uris"`
+	PairwiseIdentifierUserType             types.Bool     `tfsdk:"pairwise_identifier_user_type"`
+	PingAccessLogoutCapable                types.Bool     `tfsdk:"ping_access_logout_capable"`
+	PolicyGroup                            types.String   `tfsdk:"policy_group"`
+	SectorIdentifierUri                    types.String   `tfsdk:"sector_identifier_uri"`
 }
 
 func (r resourceUser) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
